@@ -1,6 +1,8 @@
 #include <SFML/Graphics.hpp>
+#include "point.cpp"
 
 #define AA_LEVEL 8U
+#define MAX_POINTS 50000
 
 int main(int argc, char const** argv) {
     // Create the main window
@@ -22,6 +24,9 @@ int main(int argc, char const** argv) {
     sf::Text fpsCounter("Placeholder text. If this doesn't change, the app is frozen", font, 16U);
     fpsCounter.setPosition(0,0);
     sf::Clock clock;
+
+    Point point[MAX_POINTS];
+    point[1].setPosition(400,300);
 
     // Start the game loop
     while (window.isOpen()) {
@@ -47,6 +52,8 @@ int main(int argc, char const** argv) {
         fpsCounter.setString(sf::String(std::to_string(framerate)));
         clock.restart();
         window.draw(fpsCounter);
+
+        window.draw(point[1]);
 
         // Update the window
         window.display();
