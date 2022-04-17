@@ -71,14 +71,21 @@ int main(int argc, char const** argv) {
     pointCounter.setPosition(0, 16);
 
     // TODO: Test other triangle sizes
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<std::mt19937::result_type> dice(0, 2);
+    Point lastPoint;
     Point midPoints[MAX_POINTS];
     Point origPoints[3];
     origPoints[0].setPosition(400, 100); // Top
     origPoints[1].setPosition(200, 500); // Bottom left
     origPoints[2].setPosition(600, 500); // Bottom right
 
-    bool ok = true;
-    int i = 0;
+    midPoints[0].setPosition(getRandomPoint(origPoints));
+    lastPoint =  midPoints[0];
+    Point selectedPoint = origPoints[dice(rng)];
+
+    int i = 1;
 
     // Start the game loop
     while (window.isOpen()) {
@@ -96,6 +103,12 @@ int main(int argc, char const** argv) {
             }
         }
 
+        // Create a point at the midpoint of selectedPoint and lastPoint
+        midPoints[i].setPosition(sf::Vector2f((selectedPoint.getPosition().x + lastPoint.getPosition().x) / 2, (selectedPoint.getPosition().y + lastPoint.getPosition().y) / 2));
+        lastPoint = midPoints[i];
+        selectedPoint = origPoints[dice(rng)];
+
+
         // Clear screen
         window.clear();
 
@@ -111,17 +124,14 @@ int main(int argc, char const** argv) {
         window.draw(origPoints[0]);
         window.draw(origPoints[1]);
         window.draw(origPoints[2]);
-
-        if(ok)
-            midPoints[i].setPosition(getRandomPoint(origPoints));
+        
         for (int j = 0; j < i; j++)
             window.draw(midPoints[j]);
-        if (i == MAX_POINTS)
-            ok = false;
+        window.draw(lastPoint);
 
         // Update the window
         window.display();
-        if (ok)
+        if (i != MAX_POINTS - 1)
             i++;
     }
 
