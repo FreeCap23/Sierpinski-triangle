@@ -1,12 +1,53 @@
 #include <SFML/Graphics.hpp>
+#include <random>
+#include <iostream>
 #include "point.cpp"
 
 #define AA_LEVEL 8U
-#define MAX_POINTS 50000
+#define MAX_POINTS 10000
+
+sf::Vector2f getRandomPoint(Point triangle[3]) {
+    using namespace std;
+    // Reference points
+    sf::Vector2f refPointRight;
+    refPointRight.y = 300;
+    refPointRight.x = 500;
+    sf::Vector2f refPointLeft;
+    refPointLeft.y = 300;
+    refPointLeft.x = 300;
+
+    int ya = triangle[0].getPosition().y;
+    int yb = triangle[1].getPosition().y;
+
+    // Setup random number generator
+    random_device dev;
+    mt19937 rng(dev());
+    uniform_int_distribution<mt19937::result_type> getRandomY(ya, yb);
+    
+    // Generate a random Y coordinate
+    int yp = getRandomY(rng);
+
+    // Using the generated Y coordinate, calculate a range for the X coordinate
+    // So that the random point generated is inside the triangle.
+    float xRange[2];
+    if (yp < refPointLeft.y) {
+        xRange[0] = refPointLeft.x + (refPointLeft.y - yp) / 2;
+        xRange[1] = refPointRight.x - (refPointLeft.y - yp) / 2;
+    }
+    else {
+        xRange[0] = refPointLeft.x - (yp - refPointLeft.y) / 2;
+        xRange[1] = refPointRight.x + (yp - refPointLeft.y) / 2;
+    }
+
+    uniform_int_distribution<mt19937::result_type> getRandomX(xRange[0], xRange[1]);
+    int xp = getRandomX(rng);
+
+    return sf::Vector2f(xp, yp);
+}
 
 int main(int argc, char const** argv) {
     // Create the main window
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Asteroids", 7U, sf::ContextSettings(0U, 0U, AA_LEVEL));
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Sierpinski triangle", 7U, sf::ContextSettings(0U, 0U, AA_LEVEL));
 
     // Set the Icon
     sf::Image icon;
@@ -25,8 +66,19 @@ int main(int argc, char const** argv) {
     fpsCounter.setPosition(0,0);
     sf::Clock clock;
 
-    Point point[MAX_POINTS];
-    point[1].setPosition(400,300);
+    // Point counter
+    sf::Text pointCounter("placeholder", font, 16U);
+    pointCounter.setPosition(0, 16);
+
+    // TODO: Test other triangle sizes
+    Point midPoints[MAX_POINTS];
+    Point origPoints[3];
+    origPoints[0].setPosition(400, 100); // Top
+    origPoints[1].setPosition(200, 500); // Bottom left
+    origPoints[2].setPosition(600, 500); // Bottom right
+
+    bool ok = true;
+    int i = 0;
 
     // Start the game loop
     while (window.isOpen()) {
@@ -53,10 +105,24 @@ int main(int argc, char const** argv) {
         clock.restart();
         window.draw(fpsCounter);
 
-        window.draw(point[1]);
+        pointCounter.setString(sf::String(std::to_string(i)));
+        window.draw(pointCounter);
+
+        window.draw(origPoints[0]);
+        window.draw(origPoints[1]);
+        window.draw(origPoints[2]);
+
+        if(ok)
+            midPoints[i].setPosition(getRandomPoint(origPoints));
+        for (int j = 0; j < i; j++)
+            window.draw(midPoints[j]);
+        if (i == MAX_POINTS)
+            ok = false;
 
         // Update the window
         window.display();
+        if (ok)
+            i++;
     }
 
     return EXIT_SUCCESS;
