@@ -8,7 +8,7 @@ SFMLDEPS = -lsfml-audio-d -lsfml-graphics-d -lsfml-system-d -lsfml-window-d
 SOURCES = src/main.cpp
 
 # Target file
-TARGET = asteroids
+TARGET = Sierpinski-triangle
 
 all:
 	if [ ! -d "./build" ]; then \
